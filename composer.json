@@ -1,5 +1,5 @@
 {
-  "name": "p.shklyaev/imap-mail-recipient",
+  "name": "shklyaev-p-a/imap-mail-recipient",
   "description": "get access to mailbox via imap for reading and flaggind mail message with any format decode",
   "type": "library",
   "license": "MIT",
