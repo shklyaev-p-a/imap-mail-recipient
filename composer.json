@@ -1,0 +1,16 @@
+{
+  "name": "p.shklyaev/imap-mail-recipient",
+  "description": "get access to mailbox via imap for reading and flaggind mail message with any format decode",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "ImapRecipient\\": "src"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
+  }
+}
