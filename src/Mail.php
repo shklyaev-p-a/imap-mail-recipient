@@ -2,6 +2,7 @@
 
 namespace ImapRecipient;
 
+use ImapRecipient\Constants\MediaList;
 use ImapRecipient\Media\Image;
 use ImapRecipient\Media\MediaInterface;
 use ImapRecipient\Traits\PartTrait;
@@ -90,19 +91,19 @@ class Mail
                     // attached message headers, can ignore
                     break;
                 case TYPEAPPLICATION: // application
-                    $this->addAttachment($part, $partNumber, 'files');
+                    $this->addAttachment($part, $partNumber, MediaList::FILES);
                     break;
                 case TYPEAUDIO:
-                    $this->addAttachment($part, $partNumber, 'audios');
+                    $this->addAttachment($part, $partNumber, MediaList::AUDIOS);
                     break;
                 case TYPEIMAGE:
-                    $this->addAttachment($part, $partNumber, 'images');
+                    $this->addAttachment($part, $partNumber, MediaList::IMAGES);
                     break;
                 case TYPEVIDEO:
-                    $this->addAttachment($part, $partNumber, 'videos');
+                    $this->addAttachment($part, $partNumber, MediaList::VIDEOS);
                     break;
                 case TYPEOTHER:
-                    $this->addAttachment($part, $partNumber, 'other');
+                    $this->addAttachment($part, $partNumber, MediaList::OTHER);
                     break;
             }
         }
@@ -112,7 +113,7 @@ class Mail
     {
         $filename = $this->getFilenameFromPart($part);
         if ($filename) {
-            if ($name === 'images') {
+            if ($name === MediaList::IMAGES) {
                 $this->attachments[$name][] = new Image($this->resource, $this->number, $filename, $partNumber, $part->encoding, $part->subtype);
             } else {
                 $this->attachments[$name] = [
