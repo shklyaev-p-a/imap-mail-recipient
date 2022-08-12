@@ -37,7 +37,8 @@ class Mails
      */
     public function mails(): array
     {
-        return imap_search($this->resource, $this->filters, $this->flags, $this->charset);
+        $mails = imap_search($this->resource, $this->filters, $this->flags, $this->charset);
+        return $mails ? $mails : [];
     }
 
     /**
@@ -45,6 +46,7 @@ class Mails
      */
     public function count(): int
     {
-        return count(imap_search($this->resource, $this->filters, $this->flags, $this->charset));
+        $mailsCount = imap_search($this->resource, $this->filters, $this->flags, $this->charset);
+        return $mailsCount ? count($mailsCount) : 0;
     }
 }

@@ -31,9 +31,9 @@ class Mail
     public function setHeaderFromAndSubject()
     {
         $header = imap_header($this->resource, $this->number);
-        $this->from = trim($header->from[0]->mailbox . $header->from[0]->host) ?? '';
-        $this->name = trim($header->from[0]->personal) ?? '';
-        $this->subject = imap_utf8($header->subject) ?? '';
+        $this->from = trim($header->from[0]->mailbox . $header->from[0]->host);
+        $this->name = trim($header->from[0]->personal);
+        $this->subject = imap_utf8($header->subject);
     }
 
     public function from(): string
@@ -63,12 +63,12 @@ class Mail
 
     public function header(): string
     {
-        return imap_fetchheader($this->resource, $this->number) ?? '';
+        return imap_fetchheader($this->resource, $this->number);
     }
 
     public function body(): string
     {
-        return $this->getPartDecode($this->resource, $this->number, $this->bodyPart['partNumber'], $this->bodyPart['encoding']) ?? '';
+        return $this->getPartDecode($this->resource, $this->number, $this->bodyPart['partNumber'], $this->bodyPart['encoding']);
     }
 
     protected function setParts()

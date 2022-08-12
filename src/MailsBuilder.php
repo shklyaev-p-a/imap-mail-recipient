@@ -343,7 +343,8 @@ class MailsBuilder
     {
         $this->addFilter(self::ALL);
         $this->filters = trim($this->filters);
-        return (new Mails($this, $this->resource, $this->flags, $this->charset))->mails() ?? [];
+        $mails = (new Mails($this, $this->resource, $this->flags, $this->charset))->mails();
+        return $mails ? $mails : [];
     }
 
     /**
