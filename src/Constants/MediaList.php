@@ -7,6 +7,6 @@ class MediaList
     const FILES = 'files';
     const AUDIOS = 'audios';
     const IMAGES = 'images';
-    const OTHER = 'other';
+    const OTHERS = 'others';
     const VIDEOS = 'videos';
 }

@@ -3,8 +3,11 @@
 namespace ImapRecipient;
 
 use ImapRecipient\Constants\MediaList;
+use ImapRecipient\Media\Audio;
+use ImapRecipient\Media\File;
 use ImapRecipient\Media\Image;
-use ImapRecipient\Media\MediaInterface;
+use ImapRecipient\Media\Other;
+use ImapRecipient\Media\Video;
 use ImapRecipient\Traits\PartTrait;
 
 class Mail
@@ -37,19 +40,40 @@ class Mail
         $this->subject = imap_utf8($header->subject);
     }
 
-    public function from(): string
+
+    public function attachments(): array
     {
-        return $this->from;
+        return $this->attachments;
     }
 
     public function images(): array
     {
-        return $this->attachments['images'];
+        return $this->attachments[MediaList::IMAGES] ? $this->attachments[MediaList::IMAGES] : [];
     }
 
-    public function attachments(): array
+    public function files(): array
     {
-        return $this->attachments();
+        return $this->attachments[MediaList::FILES] ? $this->attachments[MediaList::FILES] : [];
+    }
+
+    public function audios(): array
+    {
+        return $this->attachments[MediaList::AUDIOS] ? $this->attachments[MediaList::AUDIOS] : [];
+    }
+
+    public function videos(): array
+    {
+        return $this->attachments[MediaList::VIDEOS] ? $this->attachments[MediaList::VIDEOS] : [];
+    }
+
+    public function others(): array
+    {
+        return $this->attachments[MediaList::OTHERS] ? $this->attachments[MediaList::OTHERS] : [];
+    }
+
+    public function from(): string
+    {
+        return $this->from;
     }
 
     public function name(): string
@@ -77,6 +101,7 @@ class Mail
         $structure = imap_fetchstructure($this->resource, $this->number);
         $flattenedParts = $this->flattenParts($structure->parts);
         foreach ($flattenedParts as $partNumber => $part) {
+            $filename = $this->getFilenameFromPart($part);
             switch ($part->type) {
                 case TYPETEXT:
                     $this->bodyPart = [
@@ -91,37 +116,20 @@ class Mail
                     // attached message headers, can ignore
                     break;
                 case TYPEAPPLICATION: // application
-                    $this->addAttachment($part, $partNumber, MediaList::FILES);
+                    $this->attachments[MediaList::FILES][] = new File($this->resource, $this->number, $filename, $partNumber, $part->encoding, $part->subtype);
                     break;
                 case TYPEAUDIO:
-                    $this->addAttachment($part, $partNumber, MediaList::AUDIOS);
+                    $this->attachments[MediaList::AUDIOS][] = new Audio($this->resource, $this->number, $filename, $partNumber, $part->encoding, $part->subtype);
                     break;
                 case TYPEIMAGE:
-                    $this->addAttachment($part, $partNumber, MediaList::IMAGES);
+                    $this->attachments[MediaList::IMAGES][] = new Image($this->resource, $this->number, $filename, $partNumber, $part->encoding, $part->subtype);
                     break;
                 case TYPEVIDEO:
-                    $this->addAttachment($part, $partNumber, MediaList::VIDEOS);
+                    $this->attachments[MediaList::VIDEOS][] = new Video($this->resource, $this->number, $filename, $partNumber, $part->encoding, $part->subtype);
                     break;
                 case TYPEOTHER:
-                    $this->addAttachment($part, $partNumber, MediaList::OTHER);
+                    $this->attachments[MediaList::OTHERS][] = new Other($this->resource, $this->number, $filename, $partNumber, $part->encoding, $part->subtype);
                     break;
-            }
-        }
-    }
-
-    protected function addAttachment($part, $partNumber, $name)
-    {
-        $filename = $this->getFilenameFromPart($part);
-        if ($filename) {
-            if ($name === MediaList::IMAGES) {
-                $this->attachments[$name][] = new Image($this->resource, $this->number, $filename, $partNumber, $part->encoding, $part->subtype);
-            } else {
-                $this->attachments[$name] = [
-                    'name' => $filename,
-                    'format' => $part->subtype,
-                    'part' => $partNumber,
-                    'encoding' => $part->encoding
-                ];
             }
         }
     }

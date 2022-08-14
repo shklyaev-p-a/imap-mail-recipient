@@ -4,7 +4,7 @@ namespace ImapRecipient\Media;
 
 use ImapRecipient\Traits\PartTrait;
 
-class Videos implements MediaInterface
+class Video implements MediaInterface
 {
     use PartTrait;
 
