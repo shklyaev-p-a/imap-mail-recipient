@@ -47,9 +47,9 @@ class Mail
         return $this->attachments['images'];
     }
 
-    public function attachments(): MediaInterface
+    public function attachments(): array
     {
-        return MediaInterface::class;
+        return $this->attachments();
     }
 
     public function name(): string
