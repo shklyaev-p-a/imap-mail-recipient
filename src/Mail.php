@@ -42,7 +42,6 @@ class Mail
         $this->date = $header->MailDate;
     }
 
-
     public function attachments(): array
     {
         return $this->attachments;
@@ -83,12 +82,17 @@ class Mail
         return $this->name;
     }
 
+    public function date(): string
+    {
+        return $this->date;
+    }
+
     public function subject(): string
     {
         return $this->subject;
     }
 
-    public function header(): string
+    public function header(): object
     {
         return imap_header($this->resource, $this->number);
     }
