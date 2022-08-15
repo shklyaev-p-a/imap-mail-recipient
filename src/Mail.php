@@ -49,27 +49,27 @@ class Mail
 
     public function images(): array
     {
-        return $this->attachments[MediaList::IMAGES] ? $this->attachments[MediaList::IMAGES] : [];
+        return array_key_exists(MediaList::IMAGES, $this->attachments) ? $this->attachments[MediaList::IMAGES] : [];
     }
 
     public function files(): array
     {
-        return $this->attachments[MediaList::FILES] ? $this->attachments[MediaList::FILES] : [];
+        return array_key_exists(MediaList::FILES, $this->attachments) ? $this->attachments[MediaList::FILES] : [];
     }
 
     public function audios(): array
     {
-        return $this->attachments[MediaList::AUDIOS] ? $this->attachments[MediaList::AUDIOS] : [];
+        return array_key_exists(MediaList::AUDIOS, $this->attachments) ? $this->attachments[MediaList::AUDIOS] : [];
     }
 
     public function videos(): array
     {
-        return $this->attachments[MediaList::VIDEOS] ? $this->attachments[MediaList::VIDEOS] : [];
+        return array_key_exists(MediaList::VIDEOS, $this->attachments) ? $this->attachments[MediaList::VIDEOS] : [];
     }
 
     public function others(): array
     {
-        return $this->attachments[MediaList::OTHERS] ? $this->attachments[MediaList::OTHERS] : [];
+        return array_key_exists(MediaList::OTHERS, $this->attachments) ? $this->attachments[MediaList::OTHERS] : [];
     }
 
     public function from(): string
