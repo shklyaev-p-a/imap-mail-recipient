@@ -18,11 +18,12 @@ class Mail
     protected $resource;
 
     public $bodyPart;
-    public $attachments;
+    public $attachments = [];
 
     public $from = '';
     public $name = '';
     public $subject = '';
+    public $date = '';
 
     public function __construct($resource, $number)
     {
@@ -36,8 +37,9 @@ class Mail
     {
         $header = imap_header($this->resource, $this->number);
         $this->from = trim($header->from[0]->mailbox . $header->from[0]->host);
-        $this->name = trim($header->from[0]->personal);
+        $this->name = imap_utf8(trim($header->from[0]->personal));
         $this->subject = imap_utf8($header->subject);
+        $this->date = $header->MailDate;
     }
 
 
@@ -88,7 +90,7 @@ class Mail
 
     public function header(): string
     {
-        return imap_fetchheader($this->resource, $this->number);
+        return imap_header($this->resource, $this->number);
     }
 
     public function body(): string

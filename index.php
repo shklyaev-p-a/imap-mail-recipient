@@ -8,6 +8,6 @@ use ImapRecipient\Client;
 $client = new Client('local.test.123@mail.ru', 'Mr7gCnXVcTbqQWxcQ1UG');
 $client->connect();
 echo "<pre>";
-var_dump($client->getOne(13)->images());
+var_dump($client->getOne(1));
 echo "</pre>";
 $client->close();
