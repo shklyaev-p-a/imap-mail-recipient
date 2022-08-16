@@ -29,4 +29,14 @@ class Image implements MediaInterface
     {
         return $this->getPartDecode($this->resource, $this->number, $this->part, $this->encoding);
     }
+
+    public function format()
+    {
+        return $this->format;
+    }
+
+    public function name()
+    {
+        return $this->name;
+    }
 }
