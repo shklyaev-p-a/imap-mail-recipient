@@ -17,7 +17,8 @@ class Mail
     protected $number;
     protected $resource;
 
-    public $bodyPart;
+    public $htmlPart;
+    public $textPart;
     public $attachments = [];
 
     public $from = '';
@@ -97,23 +98,52 @@ class Mail
         return imap_header($this->resource, $this->number);
     }
 
-    public function body(): string
+    public function html(): ?string
     {
-        return $this->getPartDecode($this->resource, $this->number, $this->bodyPart['partNumber'], $this->bodyPart['encoding']);
+        return $this->getPartDecode($this->resource, $this->number, $this->htmlPart['partNumber'], $this->htmlPart['encoding']);
     }
+
+    public function text(): ?string
+    {
+        return $this->getPartDecode($this->resource, $this->number, $this->textPart['partNumber'], $this->textPart['encoding']);
+    }
+
 
     protected function setParts()
     {
         $structure = imap_fetchstructure($this->resource, $this->number);
+        if(!property_exists($structure, 'parts')){
+            if($structure->subtype === 'PLAIN'){
+                $this->textPart = [
+                    'partNumber' => 1,
+                    'encoding' => $structure->encoding
+                ];
+            }
+            if($structure->subtype === 'HTML'){
+                $this->htmlPart = [
+                    'partNumber' => 1,
+                    'encoding' => $structure->encoding
+                ];
+            }
+            return true;
+        }
         $flattenedParts = $this->flattenParts($structure->parts);
         foreach ($flattenedParts as $partNumber => $part) {
             $filename = $this->getFilenameFromPart($part);
             switch ($part->type) {
                 case TYPETEXT:
-                    $this->bodyPart = [
-                        'partNumber' => $partNumber,
-                        'encoding' => $part->encoding
-                    ];
+                    if($part->subtype === 'PLAIN'){
+                        $this->textPart = [
+                            'partNumber' => $partNumber,
+                            'encoding' => $part->encoding
+                        ];
+                    }
+                    if($part->subtype === 'HTML'){
+                        $this->htmlPart = [
+                            'partNumber' => $partNumber,
+                            'encoding' => $part->encoding
+                        ];
+                    }
                     break;
                 case TYPEMULTIPART:
                     // multi-part headers, can ignore
