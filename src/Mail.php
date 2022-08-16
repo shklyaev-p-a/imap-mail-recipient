@@ -36,7 +36,7 @@ class Mail
 
     public function setHeaderFromAndSubject()
     {
-        $header = imap_header($this->resource, $this->number);
+        $header = imap_headerinfo($this->resource, $this->number);
         $this->from = trim($header->from[0]->mailbox . $header->from[0]->host);
         $this->name = imap_utf8(trim($header->from[0]->personal));
         $this->subject = imap_utf8($header->subject);
@@ -95,7 +95,7 @@ class Mail
 
     public function header(): object
     {
-        return imap_header($this->resource, $this->number);
+        return imap_headerinfo($this->resource, $this->number);
     }
 
     public function html(): ?string
