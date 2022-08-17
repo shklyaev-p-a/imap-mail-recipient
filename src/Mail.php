@@ -14,11 +14,18 @@ class Mail
 {
     use PartTrait;
 
+    const PART_NUMBER = 'partNumber';
+    const ENCODING = 'encoding';
+    const FILENAME = 'filename';
+    const NAME = 'name';
+    const TYPE_PLAIN = 'PLAIN';
+    const TYPE_HTML = 'HTML';
+
     protected $number;
     protected $resource;
 
-    public $htmlPart;
-    public $textPart;
+    public $htmlPart = [];
+    public $textPart = [];
     public $attachments = [];
 
     public $from = '';
@@ -100,29 +107,36 @@ class Mail
 
     public function html(): ?string
     {
-        return $this->getPartDecode($this->resource, $this->number, $this->htmlPart['partNumber'], $this->htmlPart['encoding']);
+        return (!array_key_exists(self::PART_NUMBER, $this->htmlPart) || !array_key_exists(self::ENCODING, $this->htmlPart))
+            ?
+            ''
+            :
+            $this->getPartDecode($this->resource, $this->number, $this->htmlPart[self::PART_NUMBER], $this->htmlPart[self::ENCODING]);
     }
 
     public function text(): ?string
     {
-        return $this->getPartDecode($this->resource, $this->number, $this->textPart['partNumber'], $this->textPart['encoding']);
+        return (!array_key_exists(self::PART_NUMBER, $this->textPart) || !array_key_exists(self::ENCODING, $this->textPart))
+            ?
+            ''
+            :
+            $this->getPartDecode($this->resource, $this->number, $this->textPart[self::PART_NUMBER], $this->textPart[self::ENCODING]);
     }
-
 
     protected function setParts()
     {
         $structure = imap_fetchstructure($this->resource, $this->number);
-        if(!property_exists($structure, 'parts')){
-            if($structure->subtype === 'PLAIN'){
+        if (!property_exists($structure, 'parts')) {
+            if ($structure->subtype === self::TYPE_PLAIN) {
                 $this->textPart = [
-                    'partNumber' => 1,
-                    'encoding' => $structure->encoding
+                    self::PART_NUMBER => 1,
+                    self::ENCODING => $structure->encoding
                 ];
             }
-            if($structure->subtype === 'HTML'){
+            if ($structure->subtype === self::TYPE_HTML) {
                 $this->htmlPart = [
-                    'partNumber' => 1,
-                    'encoding' => $structure->encoding
+                    self::PART_NUMBER => 1,
+                    self::ENCODING => $structure->encoding
                 ];
             }
             return true;
@@ -132,16 +146,16 @@ class Mail
             $filename = $this->getFilenameFromPart($part);
             switch ($part->type) {
                 case TYPETEXT:
-                    if($part->subtype === 'PLAIN'){
+                    if ($part->subtype === self::TYPE_PLAIN) {
                         $this->textPart = [
-                            'partNumber' => $partNumber,
-                            'encoding' => $part->encoding
+                            self::PART_NUMBER => $partNumber,
+                            self::ENCODING => $part->encoding
                         ];
                     }
-                    if($part->subtype === 'HTML'){
+                    if ($part->subtype === self::TYPE_HTML) {
                         $this->htmlPart = [
-                            'partNumber' => $partNumber,
-                            'encoding' => $part->encoding
+                            self::PART_NUMBER => $partNumber,
+                            self::ENCODING => $part->encoding
                         ];
                     }
                     break;
@@ -198,7 +212,7 @@ class Mail
 
         if ($part->ifdparameters) {
             foreach ($part->dparameters as $object) {
-                if (strtolower($object->attribute) == 'filename') {
+                if (strtolower($object->attribute) == self::FILENAME) {
                     $filename = $object->value;
                 }
             }
@@ -206,13 +220,12 @@ class Mail
 
         if (!$filename && $part->ifparameters) {
             foreach ($part->parameters as $object) {
-                if (strtolower($object->attribute) == 'name') {
+                if (strtolower($object->attribute) == self::NAME) {
                     $filename = $object->value;
                 }
             }
         }
 
         return $filename;
-
     }
 }
