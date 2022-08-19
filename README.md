@@ -1,3 +1,14 @@
+#About
+It`s activity developing library for simple getting mail via php imap function.
+
+**Attention**
+
+_Methods and arguments constantly changing. The library is under development_
+
+**Attention**
+
+For joint development contact with me: shklyaev.p.a@mail.ru
+
 #Connect to mailbox
 
 `<?php`
@@ -37,4 +48,8 @@ ____
 
 `$client->getOne(int $number);`
 
-`$client->getOne(int $nubmer)->attachments;'`
+`$client->getOne(int $number)->text()` or  `$client->getOne(int $number)->html()` 
+
+`$client->getOne(int $nubmer)->attachments;'` for looking attachments
+
+`$images = $client->getOne(int $number)->images()[0]->get()` for get image content (similarly for another files implements MediaInterface)
