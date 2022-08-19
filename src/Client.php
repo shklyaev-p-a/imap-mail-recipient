@@ -14,6 +14,8 @@ class Client
     protected $email;
     /** @var String $password */
     protected $password;
+    /**@var String $server */
+    protected $server;
 
     /** @var $resource */
     public $resource;
@@ -22,11 +24,13 @@ class Client
      * Client constructor.
      * @param String $email
      * @param String $password
+     * @param String $server
      */
-    public function __construct(String $email, String $password)
+    public function __construct(String $email, String $password, $server = '')
     {
         $this->email = $email;
         $this->password = $password;
+        $this->server = $server;
     }
 
     /**
@@ -34,7 +38,8 @@ class Client
      */
     public function connect(): void
     {
-        $this->resource = @imap_open(AdressParser::getMailBox($this->email), $this->email, $this->password);
+        $server = ($this->server) ? $this->server : AdressParser::getMailBox($this->email);
+        $this->resource = @imap_open($server, $this->email, $this->password);
 
         if ($this->resource === false) {
             throw new \Exception(imap_last_error());

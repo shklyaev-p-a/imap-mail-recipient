@@ -3,6 +3,7 @@
 namespace ImapRecipient;
 
 use ImapRecipient\Constants\MediaList;
+use ImapRecipient\Helpers\MailStructure;
 use ImapRecipient\Media\Audio;
 use ImapRecipient\Media\File;
 use ImapRecipient\Media\Image;
@@ -16,8 +17,6 @@ class Mail
 
     const PART_NUMBER = 'partNumber';
     const ENCODING = 'encoding';
-    const FILENAME = 'filename';
-    const NAME = 'name';
     const TYPE_PLAIN = 'PLAIN';
     const TYPE_HTML = 'HTML';
 
@@ -32,22 +31,28 @@ class Mail
     public $name = '';
     public $subject = '';
     public $date = '';
+    public $messageId = '';
+    public $ownerId = '';
+    public $isParent = false;
 
     public function __construct($resource, $number)
     {
         $this->number = $number;
         $this->resource = $resource;
         $this->setParts();
-        $this->setHeaderFromAndSubject();
+        $this->setDataFromHeader();
     }
 
-    public function setHeaderFromAndSubject()
+    public function setDataFromHeader()
     {
         $header = imap_headerinfo($this->resource, $this->number);
-        $this->from = trim($header->from[0]->mailbox . $header->from[0]->host);
+        $this->from = trim($header->from[0]->mailbox . '@' . $header->from[0]->host);
         $this->name = imap_utf8(trim($header->from[0]->personal));
-        $this->subject = imap_utf8($header->subject);
+        $this->subject = MailStructure::getSubjectDecode($header->subject);
         $this->date = $header->MailDate;
+        $this->messageId = $header->message_id;
+        $this->isParent = (bool)property_exists($header, 'references');
+        $this->ownerId = (property_exists($header, 'references')) ? explode(' ', $header->references)[0] : '';
     }
 
     public function attachments(): array
@@ -123,6 +128,21 @@ class Mail
             $this->getPartDecode($this->resource, $this->number, $this->textPart[self::PART_NUMBER], $this->textPart[self::ENCODING]);
     }
 
+    public function ownerId(): string
+    {
+        return $this->ownerId;
+    }
+
+    public function isParent(): bool
+    {
+        return $this->isParent;
+    }
+
+    public function messageId(): string
+    {
+        return $this->messageId;
+    }
+
     protected function setParts()
     {
         $structure = imap_fetchstructure($this->resource, $this->number);
@@ -141,9 +161,9 @@ class Mail
             }
             return true;
         }
-        $flattenedParts = $this->flattenParts($structure->parts);
+        $flattenedParts = MailStructure::flattenParts($structure->parts);
         foreach ($flattenedParts as $partNumber => $part) {
-            $filename = $this->getFilenameFromPart($part);
+            $filename = MailStructure::getFilenameFromPart($part);
             switch ($part->type) {
                 case TYPETEXT:
                     if ($part->subtype === self::TYPE_PLAIN) {
@@ -182,50 +202,5 @@ class Mail
                     break;
             }
         }
-    }
-
-    protected function flattenParts($messageParts, $flattenedParts = array(), $prefix = '', $index = 1, $fullPrefix = true)
-    {
-
-        foreach ($messageParts as $part) {
-            $flattenedParts[$prefix . $index] = $part;
-            if (isset($part->parts)) {
-                if ($part->type == 2) {
-                    $flattenedParts = $this->flattenParts($part->parts, $flattenedParts, $prefix . $index . '.', 0, false);
-                } elseif ($fullPrefix) {
-                    $flattenedParts = $this->flattenParts($part->parts, $flattenedParts, $prefix . $index . '.');
-                } else {
-                    $flattenedParts = $this->flattenParts($part->parts, $flattenedParts, $prefix);
-                }
-                unset($flattenedParts[$prefix . $index]->parts);
-            }
-            $index++;
-        }
-
-        return $flattenedParts;
-
-    }
-
-    protected function getFilenameFromPart($part)
-    {
-        $filename = '';
-
-        if ($part->ifdparameters) {
-            foreach ($part->dparameters as $object) {
-                if (strtolower($object->attribute) == self::FILENAME) {
-                    $filename = $object->value;
-                }
-            }
-        }
-
-        if (!$filename && $part->ifparameters) {
-            foreach ($part->parameters as $object) {
-                if (strtolower($object->attribute) == self::NAME) {
-                    $filename = $object->value;
-                }
-            }
-        }
-
-        return $filename;
     }
 }
