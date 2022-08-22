@@ -32,14 +32,7 @@ class AdressParser
     public static function getDomain(string $subDomain): string
     {
         $postServer = self::getDnsRecord($subDomain);
-        if (!isset($postServer[0]['target'])) return "";
-        $postDomain = $postServer[0]['target'];
-        $postDomain = explode('.', $postDomain);
-        $firstDomain = array_pop($postDomain);
-        $secondDomain = array_pop($postDomain);
-        $mainDomain = implode('.', [$secondDomain, $firstDomain]);
-
-        return $mainDomain;
+        return self::getMainDomainFromServerInfo($postServer);
     }
 
     /**
@@ -75,5 +68,19 @@ class AdressParser
     protected static function getDnsRecord($subDomain): array
     {
         return dns_get_record($subDomain, DNS_MX);
+    }
+
+    /**
+     * @param array $postServer
+     * @return string
+     */
+    protected static function getMainDomainFromServerInfo(array $postServer): string
+    {
+        if (!isset($postServer[0]['target'])) return "";
+        $postDomain = $postServer[0]['target'];
+        $postDomain = explode('.', $postDomain);
+        $firstDomain = array_pop($postDomain);
+        $secondDomain = array_pop($postDomain);
+        return implode('.', [$secondDomain, $firstDomain]);
     }
 }

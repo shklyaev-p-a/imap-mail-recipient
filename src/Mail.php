@@ -161,6 +161,7 @@ class Mail
             }
             return true;
         }
+
         $flattenedParts = MailStructure::flattenParts($structure->parts);
         foreach ($flattenedParts as $partNumber => $part) {
             $filename = MailStructure::getFilenameFromPart($part);
