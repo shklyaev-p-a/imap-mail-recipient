@@ -11,9 +11,15 @@ trait PartTrait
         return imap_fetchbody($resource, $number, $partNumber);
     }
 
-    protected function getPartDecode($resource, int $number, $partNumber, $encoding)
+    protected function getPartDecode($resource, int $number, $partNumber, $encoding, $bodyEncoding = 'utf-8')
     {
         $data = imap_fetchbody($resource, $number, $partNumber);
-        return trim(Decoder::decode($data, $encoding));
+        $data = trim(Decoder::decode($data, $encoding));
+        if ($bodyEncoding !== 'utf-8') {
+            $data = mb_convert_encoding(quoted_printable_decode($data), 'UTF-8', $bodyEncoding);
+        }
+
+        return $data;
     }
 }
+

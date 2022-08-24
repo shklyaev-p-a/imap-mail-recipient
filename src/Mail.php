@@ -19,6 +19,7 @@ class Mail
     const ENCODING = 'encoding';
     const TYPE_PLAIN = 'PLAIN';
     const TYPE_HTML = 'HTML';
+    const BODY_ENCODING = 'bodyEncoding';
 
     protected $number;
     protected $resource;
@@ -116,7 +117,7 @@ class Mail
             ?
             ''
             :
-            $this->getPartDecode($this->resource, $this->number, $this->htmlPart[self::PART_NUMBER], $this->htmlPart[self::ENCODING]);
+            $this->getPartDecode($this->resource, $this->number, $this->htmlPart[self::PART_NUMBER], $this->htmlPart[self::ENCODING], $this->htmlPart[self::BODY_ENCODING]);
     }
 
     public function text(): ?string
@@ -125,7 +126,7 @@ class Mail
             ?
             ''
             :
-            $this->getPartDecode($this->resource, $this->number, $this->textPart[self::PART_NUMBER], $this->textPart[self::ENCODING]);
+            $this->getPartDecode($this->resource, $this->number, $this->textPart[self::PART_NUMBER], $this->textPart[self::ENCODING], $this->textPart[self::BODY_ENCODING]);
     }
 
     public function ownerId(): string
@@ -150,13 +151,15 @@ class Mail
             if ($structure->subtype === self::TYPE_PLAIN) {
                 $this->textPart = [
                     self::PART_NUMBER => 1,
-                    self::ENCODING => $structure->encoding
+                    self::ENCODING => $structure->encoding,
+                    self::BODY_ENCODING => $structure->parameters[0]->value
                 ];
             }
             if ($structure->subtype === self::TYPE_HTML) {
                 $this->htmlPart = [
                     self::PART_NUMBER => 1,
-                    self::ENCODING => $structure->encoding
+                    self::ENCODING => $structure->encoding,
+                    self::BODY_ENCODING => $structure->parameters[0]->value
                 ];
             }
             return true;
@@ -170,13 +173,15 @@ class Mail
                     if ($part->subtype === self::TYPE_PLAIN) {
                         $this->textPart = [
                             self::PART_NUMBER => $partNumber,
-                            self::ENCODING => $part->encoding
+                            self::ENCODING => $part->encoding,
+                            self::BODY_ENCODING => $part->parameters[0]->value
                         ];
                     }
                     if ($part->subtype === self::TYPE_HTML) {
                         $this->htmlPart = [
                             self::PART_NUMBER => $partNumber,
-                            self::ENCODING => $part->encoding
+                            self::ENCODING => $part->encoding,
+                            self::BODY_ENCODING => $part->parameters[0]->value
                         ];
                     }
                     break;
