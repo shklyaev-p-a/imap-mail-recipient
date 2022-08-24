@@ -16,8 +16,12 @@ class MailStructure
      */
     public static function getSubjectDecode(string $subject): string
     {
-        $text = explode('?', $subject)[3];
-        $encoding = explode('?', $subject)[2];
+        $subjectArray = explode('?', $subject);
+
+        if(count($subjectArray) === 1) return $subject;
+
+        $text = $subjectArray[3];
+        $encoding = $subjectArray[2];
 
         //toDo:: move to Decoder helper
         switch ($encoding) {
