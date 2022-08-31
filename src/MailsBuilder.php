@@ -286,7 +286,7 @@ class MailsBuilder
     }
 
     /**
-     * @param string $text Скрытые получатели письма
+     * @param string $recipient Скрытые получатели письма
      *
      * @return MailsBuilder
      */
