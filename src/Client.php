@@ -34,6 +34,8 @@ class Client
     }
 
     /**
+     * open connection
+     *
      * @throws \Exception
      */
     public function connect(): void
@@ -66,7 +68,7 @@ class Client
     }
 
     /**
-     *
+     * close connection
      */
     public function close(): void
     {

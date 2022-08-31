@@ -34,7 +34,7 @@ class MailStructureTest extends TestCase
     {
         return [
             'BASE_64' => ['=?utf-8?B?VGVzdCBiYXNlNjQgc3RyaW5nIGRlY29kZQ==?=', 'Test base64 string decode'],
-            //'IMAP_8BIT' => ['=?utf-8?Q?VGVzdCBiYXNlNjQgc3RyaW5nIGRlY29kZQ==?=', 'Test 8bit string decode'], //ignore when can include imap library with function and constants
+            //'IMAP_8BIT' => ['=?ISO-8859-1?Q?Olle_J=E4rnefors?= <ojarnef@admin.kth.se>', 'Olle Järnefors'], //ignore when can include imap library with function and constants
             'Without encoding' => ['Test not encoding string', 'Test not encoding string']
         ];
     }
