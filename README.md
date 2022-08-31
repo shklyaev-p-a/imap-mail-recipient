@@ -53,3 +53,6 @@ ____
 `$client->getOne(int $nubmer)->attachments;'` for looking attachments
 
 `$images = $client->getOne(int $number)->images()[0]->get()` for get image content (similarly for another files implements MediaInterface)
+
+
+test running: ` php ./vendor/bin/phpunit` or `composer test`
