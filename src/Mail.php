@@ -40,16 +40,16 @@ class Mail
     {
         $this->number = $number;
         $this->resource = $resource;
-        $this->setParts();
+        $this->parsePart();
         $this->setDataFromHeader();
     }
 
     public function setDataFromHeader()
     {
-        $header = imap_headerinfo($this->resource, $this->number);
+        $header = $this->header();
         $this->from = trim($header->from[0]->mailbox . '@' . $header->from[0]->host);
         $this->name = imap_utf8(trim($header->from[0]->personal));
-        $this->subject = MailStructure::getSubjectDecode($header->subject);
+        $this->subject = MailStructure::getSubjectDecode($header->subject ?? '');
         $this->date = $header->MailDate;
         $this->messageId = $header->message_id;
         $this->isParent = (bool)property_exists($header, 'references');
@@ -144,24 +144,35 @@ class Mail
         return $this->messageId;
     }
 
-    protected function setParts()
+    /**
+     * @param $structure root fetchstructure or part of parts in fetchstructure object
+     * @param int $partNumber default 1 if not parts array in fetchstructure object
+     *
+     * @return void
+     */
+    protected function setParts($structure, $partNumber = 1): void
+    {
+        if ($structure->subtype === self::TYPE_PLAIN) {
+            $this->textPart = [
+                self::PART_NUMBER => $partNumber,
+                self::ENCODING => $structure->encoding,
+                self::BODY_ENCODING => $structure->parameters[0]->value
+            ];
+        }
+        if ($structure->subtype === self::TYPE_HTML) {
+            $this->htmlPart = [
+                self::PART_NUMBER => $partNumber,
+                self::ENCODING => $structure->encoding,
+                self::BODY_ENCODING => $structure->parameters[0]->value
+            ];
+        }
+    }
+
+    protected function parsePart()
     {
         $structure = imap_fetchstructure($this->resource, $this->number);
         if (!property_exists($structure, 'parts')) {
-            if ($structure->subtype === self::TYPE_PLAIN) {
-                $this->textPart = [
-                    self::PART_NUMBER => 1,
-                    self::ENCODING => $structure->encoding,
-                    self::BODY_ENCODING => $structure->parameters[0]->value
-                ];
-            }
-            if ($structure->subtype === self::TYPE_HTML) {
-                $this->htmlPart = [
-                    self::PART_NUMBER => 1,
-                    self::ENCODING => $structure->encoding,
-                    self::BODY_ENCODING => $structure->parameters[0]->value
-                ];
-            }
+            $this->setParts($structure);
             return true;
         }
 
@@ -170,20 +181,7 @@ class Mail
             $filename = MailStructure::getFilenameFromPart($part);
             switch ($part->type) {
                 case TYPETEXT:
-                    if ($part->subtype === self::TYPE_PLAIN) {
-                        $this->textPart = [
-                            self::PART_NUMBER => $partNumber,
-                            self::ENCODING => $part->encoding,
-                            self::BODY_ENCODING => $part->parameters[0]->value
-                        ];
-                    }
-                    if ($part->subtype === self::TYPE_HTML) {
-                        $this->htmlPart = [
-                            self::PART_NUMBER => $partNumber,
-                            self::ENCODING => $part->encoding,
-                            self::BODY_ENCODING => $part->parameters[0]->value
-                        ];
-                    }
+                    $this->setParts($part, $partNumber);
                     break;
                 case TYPEMULTIPART:
                     // multi-part headers, can ignore
