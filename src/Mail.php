@@ -46,10 +46,10 @@ class Mail
 
     public function setDataFromHeader()
     {
-        $header = imap_headerinfo($this->resource, $this->number);
+        $header = $this->header();
         $this->from = trim($header->from[0]->mailbox . '@' . $header->from[0]->host);
         $this->name = imap_utf8(trim($header->from[0]->personal));
-        $this->subject = MailStructure::getSubjectDecode($header->subject);
+        $this->subject = MailStructure::getSubjectDecode($header->subject ?? '');
         $this->date = $header->MailDate;
         $this->messageId = $header->message_id;
         $this->isParent = (bool)property_exists($header, 'references');
